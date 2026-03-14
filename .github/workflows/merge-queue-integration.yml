@@ -1,0 +1,37 @@
+name: Merge Queue Integration
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+
+permissions:
+  contents: read
+
+jobs:
+  always-green:
+    name: always-green
+    runs-on: ubuntu-latest
+    steps:
+      - name: always green
+        run: exit 0
+
+  fixture-gate:
+    name: fixture-gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: check out repository
+        uses: actions/checkout@v4
+      - name: evaluate fixture
+        shell: bash
+        run: |
+          if grep -q 'workflow-slow' integration-fixture.txt; then
+            sleep 45
+          fi
+          if grep -q 'workflow-fail' integration-fixture.txt; then
+            echo 'Fixture requested workflow failure'
+            exit 1
+          fi
